@@ -561,12 +561,12 @@ elif ss.page == "form":
             # 필수 입력값 검증
             if not all([작업자_소속, 작업자_성명, 시공업체, 시공관리자]):
                 st.error("모든 필수 항목을 입력해주세요.")
-                return
+                st.stop()
 
             # 서명 이미지 검증
             if sign_io is None:
                 st.error("시공관리자 서명이 필요합니다.")
-                return
+                st.stop()
 
             # 문서 생성
             buf = make_docx(
