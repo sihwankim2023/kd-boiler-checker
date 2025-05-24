@@ -4,7 +4,7 @@ from datetime import date
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
-from streamlit_drawable_canvas import st_canvas
+#from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 import re
 import base64
@@ -113,7 +113,6 @@ def make_docx(info: dict, sign_png: BytesIO | None) -> BytesIO:
         p_mgr = doc.add_paragraph()
         p_mgr.alignment = WD_ALIGN_PARAGRAPH.RIGHT      # ← 단락 정렬
         run = p_mgr.add_run(f"○ 시공관리자  : {info['시공관리자']}   (서명) ")
-        run.add_picture(sign_png, width=Pt(100))
     else:
         p_mgr = doc.add_paragraph(f"○ 시공관리자  : {info['시공관리자']}   (서명) ")
         p_mgr.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -520,13 +519,13 @@ elif ss.page == "form":
     시공업체 = s1.text_input("시공업체(상호)")
     시공관리자 = s2.text_input("시공관리자")
 
-    st.markdown("#### 시공관리자 서명(마우스로 필기)")
-    canvas = st_canvas(fill_color="#000000", stroke_width=2, background_color="#FFFFFF",
-                       height=120, width=400, drawing_mode="freedraw", key="sign")
+    # st.markdown("#### 시공관리자 서명(마우스로 필기)")
+    # canvas = st_canvas(fill_color="#000000", stroke_width=2, background_color="#FFFFFF",
+    #                    height=120, width=400, drawing_mode="freedraw", key="sign")
     sign_io = None
-    if canvas.image_data is not None:
-        img = Image.fromarray(canvas.image_data.astype("uint8"))
-        sign_io = BytesIO(); img.save(sign_io, format="PNG"); sign_io.seek(0)
+    # if canvas.image_data is not None:
+    #     img = Image.fromarray(canvas.image_data.astype("uint8"))
+    #     sign_io = BytesIO(); img.save(sign_io, format="PNG"); sign_io.seek(0)
 
     # ★ 바로 아래 이 위치에 CSS 추가하세요!
     st.markdown("""
@@ -564,9 +563,9 @@ elif ss.page == "form":
                 st.stop()
 
             # 서명 이미지 검증
-            if sign_io is None:
-                st.error("시공관리자 서명이 필요합니다.")
-                st.stop()
+            # if sign_io is None:
+            #     st.error("시공관리자 서명이 필요합니다.")
+            #     st.stop()
 
             # 문서 생성
             buf = make_docx(
