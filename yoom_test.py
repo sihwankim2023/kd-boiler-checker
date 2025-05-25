@@ -351,9 +351,6 @@ if st.session_state.page == "model":
         &nbsp;&nbsp;&nbsp;&nbsp;- 특정가스사용시설 외 가정용보일러 설치시설 등 → **도시가스사**에 제출  
         """, unsafe_allow_html=True)
 
-    with col2:
-        # st.markdown(image_html, unsafe_allow_html=True) # <-- 이 줄을 삭제합니다.
-
     # ✅ 여기서 col2 블록 벗어나 아래에 삽입
     st.markdown(
         "<h3>2. 급배기방식 전환 작업자의 자격 : 아래 항목 중 하나를 선택해주세요.</h3>",
