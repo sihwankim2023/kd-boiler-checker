@@ -21,11 +21,11 @@ def get_base64_image(image_path):
 # ────────────────────────────────────────────────
 st.set_page_config("경동나비엔 가스보일러 급배기전환 모델 확인 프로그램", layout="wide")
 
-# 이미지 표시 방식 변경
-try:
-    st.image("images/kd.png", width=300)
-except:
-    st.error("이미지를 불러올 수 없습니다.")
+# 이미지 표시 방식 변경 (상단 중복 이미지 삭제)
+# try:
+#     st.image("images/kd.png", width=300)
+# except:
+#     st.error("이미지를 불러올 수 없습니다.")
 
 # ────────────────────────────────────────────────
 # 2) 세션 기본값
