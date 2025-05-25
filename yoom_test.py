@@ -352,7 +352,7 @@ if st.session_state.page == "model":
         """, unsafe_allow_html=True)
 
     with col2:
-        st.markdown(image_html, unsafe_allow_html=True)
+        # st.markdown(image_html, unsafe_allow_html=True) # <-- 이 줄을 삭제합니다.
 
     # ✅ 여기서 col2 블록 벗어나 아래에 삽입
     st.markdown(
