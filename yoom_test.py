@@ -337,6 +337,7 @@ df = pd.DataFrame(data)
 if st.session_state.page == "model":
     st.title("경동나비엔 가스보일러 급배기전환 모델 확인 프로그램")
 
+    # 설명과 이미지를 나란히 배치하기 위해 컬럼 사용
     col1, col2 = st.columns([1, 1])  # 왼쪽: 설명, 오른쪽: 이미지
 
     with col1:
@@ -350,6 +351,13 @@ if st.session_state.page == "model":
         &nbsp;&nbsp;&nbsp;&nbsp;- 특정가스사용시설 또는 LPG 특정사용시설 등 → **안전공사검사원**에게 제출  
         &nbsp;&nbsp;&nbsp;&nbsp;- 특정가스사용시설 외 가정용보일러 설치시설 등 → **도시가스사**에 제출  
         """, unsafe_allow_html=True)
+
+    with col2:
+        # 이미지 표시
+        try:
+            st.image("images/kd.png", width=300)
+        except:
+            st.error("이미지를 불러올 수 없습니다.")
 
     # ✅ 여기서 col2 블록 벗어나 아래에 삽입
     st.markdown(
@@ -377,7 +385,6 @@ if st.session_state.page == "model":
         ss.page = "form"
         ss.conversion_ok = True
         ss.판별완료 = True
-        st.experimental_rerun()
 
 # ────────────────────────────────────────────────
 elif ss.page == "product":
