@@ -21,12 +21,11 @@ def get_base64_image(image_path):
 # ────────────────────────────────────────────────
 st.set_page_config("경동나비엔 가스보일러 급배기전환 모델 확인 프로그램", layout="wide")
 
-# 이미지 base64 인코딩
-image_base64 = get_base64_image("images/kd.jpeg")
-if image_base64:
-    image_html = f'<img src="data:image/jpeg;base64,{image_base64}" width="300">'
-else:
-    image_html = '<p style="color:red;">이미지를 불러올 수 없습니다.</p>'
+# 이미지 표시 방식 변경
+try:
+    st.image("images/kd.png", width=300)
+except:
+    st.error("이미지를 불러올 수 없습니다.")
 
 # ────────────────────────────────────────────────
 # 2) 세션 기본값
@@ -377,8 +376,10 @@ if st.session_state.page == "model":
         )
         st.stop()
 
-    if st.button("급배기전환 작업이 가능합니다. (더블클릭)"):
-        st.session_state.page = "product"
+    if st.button("급배기전환 작업이 가능합니다."):
+        ss.page = "form"
+        ss.conversion_ok = True
+        ss.판별완료 = True
 
 # ────────────────────────────────────────────────
 elif ss.page == "product":
