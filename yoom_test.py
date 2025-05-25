@@ -380,6 +380,7 @@ if st.session_state.page == "model":
         ss.page = "form"
         ss.conversion_ok = True
         ss.판별완료 = True
+        st.experimental_rerun()
 
 # ────────────────────────────────────────────────
 elif ss.page == "product":
