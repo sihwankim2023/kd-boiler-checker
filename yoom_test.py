@@ -385,6 +385,7 @@ if st.session_state.page == "model":
         ss.page = "form"
         ss.conversion_ok = True
         ss.판별완료 = True
+        st.stop()
 
 # ────────────────────────────────────────────────
 elif ss.page == "product":
