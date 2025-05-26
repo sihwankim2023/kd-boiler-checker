@@ -382,7 +382,7 @@ if st.session_state.page == "model":
         st.stop()
 
     if st.button("급배기전환 작업이 가능합니다."):
-        ss.page = "form"
+        ss.page = "product"
         ss.conversion_ok = True
         ss.판별완료 = True
         st.stop()
