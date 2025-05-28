@@ -1,6 +1,6 @@
 import streamlit as st, pandas as pd
 from io import BytesIO
-from datetime import date
+from datetime import date, datetime
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
@@ -39,7 +39,8 @@ def init_session_state():
         qualification="",
         conversion_ok=False,
         판별완료=False,
-        form_data={}
+        form_data={},
+        history=[]  # 이전 입력 정보를 저장할 리스트 추가
     )
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -497,6 +498,24 @@ elif ss.page == "form":
         ss.page = "product"
         st.stop()
 
+    # 이전 입력 정보 보기 버튼 추가
+    if st.button("이전 입력 정보 보기"):
+        if not st.session_state.history:
+            st.info("이전 입력 정보가 없습니다.")
+        else:
+            st.markdown("### 이전 입력 정보")
+            for idx, data in enumerate(reversed(st.session_state.history), 1):
+                with st.expander(f"입력 정보 #{idx} - {data['timestamp']}"):
+                    st.write(f"**연소기명:** {data['연소기명']}")
+                    st.write(f"**수량:** {data['수량']}")
+                    st.write(f"**변경일:** {data['변경일']}")
+                    st.write(f"**작업자 소속:** {data['작업자_소속']}")
+                    st.write(f"**작업자 성명:** {data['작업자_성명']}")
+                    st.write(f"**작업자격:** {data['작업자격']}")
+                    st.write(f"**시공업체:** {data['시공업체']}")
+                    st.write(f"**시공관리자:** {data['시공관리자']}")
+                    st.write(f"**입력 시간:** {data['timestamp']}")
+
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
     g1, g2, g3, g4 = st.columns([1, 3, 1, 1])
@@ -569,10 +588,22 @@ elif ss.page == "form":
                 st.error("모든 필수 항목을 입력해주세요.")
                 st.stop()
 
-            # 서명 이미지 검증
-            # if sign_io is None:
-            #     st.error("시공관리자 서명이 필요합니다.")
-            #     st.stop()
+            # 현재 입력 정보를 딕셔너리로 저장
+            current_data = {
+                "번호": "NO.1",
+                "연소기명": 연소기명,
+                "수량": 수량,
+                "변경일": 변경일자,
+                "작업자_소속": 작업자_소속,
+                "작업자_성명": 작업자_성명,
+                "작업자격": 작업자격,
+                "시공업체": 시공업체,
+                "시공관리자": 시공관리자,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # 히스토리에 추가
+            st.session_state.history.append(current_data)
 
             # 문서 생성
             buf = make_docx(
