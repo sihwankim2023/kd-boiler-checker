@@ -422,7 +422,7 @@ elif ss.page == "product":
     # 헤더 + '이전으로' 버튼 같이 표시
     head1, head2 = st.columns([4, 1])
     head1.markdown("### 급배기전환 제품을 선택하세요")
-    if head2.button("◀ 이전으로 (더블클릭)"):
+    if head2.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
         ss.page = "model"
         ss.show_status = False     # 전환결과 숨기기
         ss['판별완료'] = False     # 확인서 버튼 비활성화
@@ -532,29 +532,6 @@ if ss.show_status:
 # ────────────────────────────────────────────────
 elif ss.page == "form":
     st.title("연소기 변경 확인서 작성 (급배기방식 전환)")
-
-    # ─── (수정) 상단에 '이전' 버튼 추가 ───
-    if st.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
-        ss.page = "product"
-        st.stop()
-
-    # 이전 입력 정보 보기 버튼 추가
-    if st.button("이전 입력 정보 보기"):
-        if not st.session_state.history:
-            st.info("이전 입력 정보가 없습니다.")
-        else:
-            st.markdown("### 이전 입력 정보")
-            for idx, data in enumerate(reversed(st.session_state.history), 1):
-                with st.expander(f"입력 정보 #{idx} - {data['timestamp']}"):
-                    st.write(f"**연소기명:** {data['연소기명']}")
-                    st.write(f"**수량:** {data['수량']}")
-                    st.write(f"**변경일:** {data['변경일']}")
-                    st.write(f"**작업자 소속:** {data['작업자_소속']}")
-                    st.write(f"**작업자 성명:** {data['작업자_성명']}")
-                    st.write(f"**작업자격:** {data['작업자격']}")
-                    st.write(f"**시공업체:** {data['시공업체']}")
-                    st.write(f"**시공관리자:** {data['시공관리자']}")
-                    st.write(f"**입력 시간:** {data['timestamp']}")
 
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
