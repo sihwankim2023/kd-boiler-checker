@@ -40,7 +40,26 @@ def init_session_state():
         conversion_ok=False,
         판별완료=False,
         form_data={},
-        history=[]  # 이전 입력 정보를 저장할 리스트 추가
+        history=[],
+        # 첫 페이지 (model) 저장값
+        selected_qualification="",
+        # 두 번째 페이지 (product) 저장값
+        selected_구분="",
+        selected_세부구분="",
+        selected_모델명="",
+        selected_용량="",
+        selected_연료="",
+        selected_급배기방식="",
+        # 세 번째 페이지 (form) 저장값
+        form_번호="NO.1",
+        form_연소기명="",
+        form_수량=1,
+        form_변경일자=date.today(),
+        form_작업자_소속="",
+        form_작업자_성명="",
+        form_작업자격="가스보일러 제조사의 A/S 종사자",
+        form_시공업체="",
+        form_시공관리자=""
     )
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -374,7 +393,15 @@ if st.session_state.page == "model":
             "가스보일러 판매업체 직원으로서 A/S 업무에 2년 이상 근무한 자",
            "해당없음",
         ],
+        index=0 if not ss.selected_qualification else [
+            "가스보일러 제조사의 A/S 종사자",
+            "가스보일러 판매업체 직원으로서 가스보일러 제조사의 A/S 교육을 받은 자",
+            "가스보일러 판매업체 직원으로서 A/S 업무에 2년 이상 근무한 자",
+            "해당없음"
+        ].index(ss.selected_qualification)
     )
+    ss.selected_qualification = q
+
     if q == "해당없음":
         st.markdown(
             '<p style="color:red;font-weight:bold;">※ 위 자격이 없는 설치업자는 급배기방식을 전환하여 설치할 수 없습니다.</p>',
@@ -416,24 +443,37 @@ div[data-testid="stSelectbox"] > div {
 """, unsafe_allow_html=True)
 
 
-    sel_g = st.selectbox("1. 구분", df["구분"].unique())
+    sel_g = st.selectbox("1. 구분", df["구분"].unique(), 
+                        index=0 if not ss.selected_구분 else list(df["구분"].unique()).index(ss.selected_구분))
+    ss.selected_구분 = sel_g
     df2 = df[df["구분"] == sel_g]
 
-    sel_s = st.selectbox("2. 세부구분", df2["세부구분"].unique())
+    sel_s = st.selectbox("2. 세부구분", df2["세부구분"].unique(),
+                        index=0 if not ss.selected_세부구분 else list(df2["세부구분"].unique()).index(ss.selected_세부구분))
+    ss.selected_세부구분 = sel_s
     df3 = df2[df2["세부구분"] == sel_s]
 
-    sel_m = st.selectbox("3. 모델명", df3["모델명"].unique())
+    sel_m = st.selectbox("3. 모델명", df3["모델명"].unique(),
+                        index=0 if not ss.selected_모델명 else list(df3["모델명"].unique()).index(ss.selected_모델명))
+    ss.selected_모델명 = sel_m
 
     df4 = df3[df3["모델명"] == sel_m]
     caps = []
     for cs in df4["용량"].unique():
         caps.extend(["없음"] if cs.strip() == "없음" else [c.strip() for c in cs.split(",")])
-    sel_c = st.selectbox("4. 용량", sorted(set(caps)))
+    caps = sorted(set(caps))
+    sel_c = st.selectbox("4. 용량", caps,
+                        index=0 if not ss.selected_용량 else caps.index(ss.selected_용량))
+    ss.selected_용량 = sel_c
 
     df5 = df4[df4.apply(lambda r: capacity_ok(r, sel_c), axis=1)]
-    sel_f = st.selectbox("5. 사용연료", df5["연료"].unique())
+    sel_f = st.selectbox("5. 사용연료", df5["연료"].unique(),
+                        index=0 if not ss.selected_연료 else list(df5["연료"].unique()).index(ss.selected_연료))
+    ss.selected_연료 = sel_f
     df6 = df5[df5["연료"] == sel_f]
-    sel_v = st.selectbox("6. 급배기방식", df6["급배기방식"].unique())
+    sel_v = st.selectbox("6. 급배기방식", df6["급배기방식"].unique(),
+                        index=0 if not ss.selected_급배기방식 else list(df6["급배기방식"].unique()).index(ss.selected_급배기방식))
+    ss.selected_급배기방식 = sel_v
 
 
     # ── 판별 버튼 & 상태 메시지 + 버튼 같이 표시 ──
@@ -519,10 +559,16 @@ elif ss.page == "form":
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
     g1, g2, g3, g4 = st.columns([1, 3, 1, 1])
-    번호       = g1.text_input("번호", value="NO.1", disabled=True, label_visibility="collapsed")
-    연소기명   = g2.text_input("연소기명", value=ss.model_full, disabled=True, label_visibility="collapsed")
-    수량       = g3.number_input("수량", min_value=1, value=1, label_visibility="collapsed")
-    변경일자   = g4.date_input("변경일자", date.today(), label_visibility="collapsed")
+    번호 = g1.text_input("번호", value=ss.form_번호, disabled=True, label_visibility="collapsed")
+    연소기명 = g2.text_input("연소기명", value=ss.form_연소기명 or ss.model_full, disabled=True, label_visibility="collapsed")
+    수량 = g3.number_input("수량", min_value=1, value=ss.form_수량, label_visibility="collapsed")
+    변경일자 = g4.date_input("변경일자", value=ss.form_변경일자, label_visibility="collapsed")
+
+    # 입력값 저장
+    ss.form_번호 = 번호
+    ss.form_연소기명 = 연소기명
+    ss.form_수량 = 수량
+    ss.form_변경일자 = 변경일자
 
     # 라벨 표시를 별도 줄에 배치
     g1.caption("번호"); g2.caption("연소기명"); g3.caption("수량"); g4.caption("변경일자")
@@ -532,26 +578,28 @@ elif ss.page == "form":
     # == 작업자 정보 ==
     st.markdown("### ■ 연소기 변경 작업자 정보")
     j1, j2, j3 = st.columns([1, 1, 2])
-    작업자_소속 = j1.text_input("소속")
-    작업자_성명 = j2.text_input("성명(서명)")
+    작업자_소속 = j1.text_input("소속", value=ss.form_작업자_소속)
+    작업자_성명 = j2.text_input("성명(서명)", value=ss.form_작업자_성명)
     radio = [
         "가스보일러 제조사의 A/S 종사자",
         "가스보일러 판매업체 직원으로서 제조사 A/S 교육 이수자",
         "가스보일러 판매업체 직원으로서 A/S 업무 2년 이상",
     ]
-    작업자격 = j3.radio("작업자격", radio, index=0)
+    작업자격 = j3.radio("작업자격", radio, 
+                    index=0 if not ss.form_작업자격 else radio.index(ss.form_작업자격))
+
+    # 입력값 저장
+    ss.form_작업자_소속 = 작업자_소속
+    ss.form_작업자_성명 = 작업자_성명
+    ss.form_작업자격 = 작업자격
 
     s1, s2 = st.columns(2)
-    시공업체 = s1.text_input("시공업체(상호)")
-    시공관리자 = s2.text_input("시공관리자")
+    시공업체 = s1.text_input("시공업체(상호)", value=ss.form_시공업체)
+    시공관리자 = s2.text_input("시공관리자", value=ss.form_시공관리자)
 
-    # st.markdown("#### 시공관리자 서명(마우스로 필기)")
-    # canvas = st_canvas(fill_color="#000000", stroke_width=2, background_color="#FFFFFF",
-    #                    height=120, width=400, drawing_mode="freedraw", key="sign")
-    sign_io = None
-    # if canvas.image_data is not None:
-    #     img = Image.fromarray(canvas.image_data.astype("uint8"))
-    #     sign_io = BytesIO(); img.save(sign_io, format="PNG"); sign_io.seek(0)
+    # 입력값 저장
+    ss.form_시공업체 = 시공업체
+    ss.form_시공관리자 = 시공관리자
 
     # ★ 바로 아래 이 위치에 CSS 추가하세요!
     st.markdown("""
