@@ -385,21 +385,25 @@ if st.session_state.page == "model":
         unsafe_allow_html=True
     )
 
+    # 초기 선택값 설정
+    if 'qualification_radio' not in st.session_state:
+        st.session_state.qualification_radio = ss.selected_qualification if ss.selected_qualification else "가스보일러 제조사의 A/S 종사자"
+
     q = st.radio(
         "급배기전환 작업이 가능한 작업자인지 확인해주세요.",
         [
             "가스보일러 제조사의 A/S 종사자",
             "가스보일러 판매업체 직원으로서 가스보일러 제조사의 A/S 교육을 받은 자",
             "가스보일러 판매업체 직원으로서 A/S 업무에 2년 이상 근무한 자",
-           "해당없음",
+            "해당없음",
         ],
         key="qualification_radio",
-        index=0 if not ss.selected_qualification else [
+        index=[
             "가스보일러 제조사의 A/S 종사자",
             "가스보일러 판매업체 직원으로서 가스보일러 제조사의 A/S 교육을 받은 자",
             "가스보일러 판매업체 직원으로서 A/S 업무에 2년 이상 근무한 자",
             "해당없음"
-        ].index(ss.selected_qualification)
+        ].index(st.session_state.qualification_radio)
     )
     ss.selected_qualification = st.session_state.qualification_radio
 
