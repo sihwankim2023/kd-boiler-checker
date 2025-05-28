@@ -422,12 +422,12 @@ elif ss.page == "product":
     # 헤더 + '이전으로' 버튼 같이 표시
     head1, head2 = st.columns([4, 1])
     head1.markdown("### 급배기전환 제품을 선택하세요")
-    if head2.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
+    if head2.button("◀ 이전으로", key="back_to_model"):
         ss.page = "model"
         ss.show_status = False     # 전환결과 숨기기
         ss['판별완료'] = False     # 확인서 버튼 비활성화
         ss.conversion_ok = False   # conversion 상태 초기화
-        st.rerun()  # 페이지 새로고침 추가
+        st.rerun()
 
 
 
@@ -534,10 +534,10 @@ elif ss.page == "form":
     st.title("연소기 변경 확인서 작성 (급배기방식 전환)")
 
     # ─── 상단에 '이전' 버튼 추가 ───
-    if st.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
+    if st.button("◀ 이전으로", key="back_to_product"):
         ss.page = "product"
         ss.show_status = True  # 전환결과 표시 유지
-        st.rerun()  # 페이지 새로고침 추가
+        st.rerun()
 
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
