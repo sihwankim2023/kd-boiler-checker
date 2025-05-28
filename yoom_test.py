@@ -448,11 +448,15 @@ div[data-testid="stSelectbox"] > div {
     ss.selected_구분 = sel_g
     df2 = df[df["구분"] == sel_g]
 
-    sel_s = st.selectbox("2. 세부구분", df2["세부구분"].unique(),
-                        index=0 if not ss.selected_세부구분 else list(df2["세부구분"].unique()).index(ss.selected_세부구분))
+    # 세부구분 선택 로직 수정
+    sub_category_list = list(df2["세부구분"].unique())
+    sub_category_index = 0 if not ss.selected_세부구분 or ss.selected_세부구분 not in sub_category_list else sub_category_list.index(ss.selected_세부구분)
+    sel_s = st.selectbox("2. 세부구분", sub_category_list,
+                        index=sub_category_index)
     ss.selected_세부구분 = sel_s
     df3 = df2[df2["세부구분"] == sel_s]
 
+    # 모델명 선택 로직 (이미 수정됨)
     model_list = list(df3["모델명"].unique())
     model_index = 0 if not ss.selected_모델명 or ss.selected_모델명 not in model_list else model_list.index(ss.selected_모델명)
     sel_m = st.selectbox("3. 모델명", model_list,
@@ -464,17 +468,29 @@ div[data-testid="stSelectbox"] > div {
     for cs in df4["용량"].unique():
         caps.extend(["없음"] if cs.strip() == "없음" else [c.strip() for c in cs.split(",")])
     caps = sorted(set(caps))
-    sel_c = st.selectbox("4. 용량", caps,
-                        index=0 if not ss.selected_용량 else caps.index(ss.selected_용량))
+
+    # 용량 선택 로직 수정
+    capacity_list = caps
+    capacity_index = 0 if not ss.selected_용량 or ss.selected_용량 not in capacity_list else capacity_list.index(ss.selected_용량)
+    sel_c = st.selectbox("4. 용량", capacity_list,
+                        index=capacity_index)
     ss.selected_용량 = sel_c
 
     df5 = df4[df4.apply(lambda r: capacity_ok(r, sel_c), axis=1)]
-    sel_f = st.selectbox("5. 사용연료", df5["연료"].unique(),
-                        index=0 if not ss.selected_연료 else list(df5["연료"].unique()).index(ss.selected_연료))
+
+    # 사용연료 선택 로직 수정
+    fuel_list = list(df5["연료"].unique())
+    fuel_index = 0 if not ss.selected_연료 or ss.selected_연료 not in fuel_list else fuel_list.index(ss.selected_연료)
+    sel_f = st.selectbox("5. 사용연료", fuel_list,
+                        index=fuel_index)
     ss.selected_연료 = sel_f
     df6 = df5[df5["연료"] == sel_f]
-    sel_v = st.selectbox("6. 급배기방식", df6["급배기방식"].unique(),
-                        index=0 if not ss.selected_급배기방식 else list(df6["급배기방식"].unique()).index(ss.selected_급배기방식))
+
+    # 급배기방식 선택 로직 수정
+    exhaust_list = list(df6["급배기방식"].unique())
+    exhaust_index = 0 if not ss.selected_급배기방식 or ss.selected_급배기방식 not in exhaust_list else exhaust_list.index(ss.selected_급배기방식)
+    sel_v = st.selectbox("6. 급배기방식", exhaust_list,
+                        index=exhaust_index)
     ss.selected_급배기방식 = sel_v
 
 
