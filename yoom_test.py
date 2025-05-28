@@ -453,8 +453,10 @@ div[data-testid="stSelectbox"] > div {
     ss.selected_세부구분 = sel_s
     df3 = df2[df2["세부구분"] == sel_s]
 
-    sel_m = st.selectbox("3. 모델명", df3["모델명"].unique(),
-                        index=0 if not ss.selected_모델명 else list(df3["모델명"].unique()).index(ss.selected_모델명))
+    model_list = list(df3["모델명"].unique())
+    model_index = 0 if not ss.selected_모델명 or ss.selected_모델명 not in model_list else model_list.index(ss.selected_모델명)
+    sel_m = st.selectbox("3. 모델명", model_list,
+                        index=model_index)
     ss.selected_모델명 = sel_m
 
     df4 = df3[df3["모델명"] == sel_m]
