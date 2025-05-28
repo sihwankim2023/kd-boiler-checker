@@ -533,6 +533,11 @@ if ss.show_status:
 elif ss.page == "form":
     st.title("연소기 변경 확인서 작성 (급배기방식 전환)")
 
+    # ─── 상단에 '이전' 버튼 추가 ───
+    if st.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
+        ss.page = "product"
+        st.stop()
+
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
     g1, g2, g3, g4 = st.columns([1, 3, 1, 1])
