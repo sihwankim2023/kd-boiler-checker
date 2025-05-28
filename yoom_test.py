@@ -535,7 +535,7 @@ elif ss.page == "form":
 
     # ─── 상단에 '이전' 버튼 추가 ───
     if st.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
-        ss.page = "product"
+        ss.page = "product"  # model에서 product로 변경
         st.stop()
 
     # == 상단 : 제품 정보 ==
