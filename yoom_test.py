@@ -402,18 +402,25 @@ if st.session_state.page == "model":
     )
     ss.selected_qualification = q
 
+    # 자격 선택에 따른 메시지 표시 및 conversion_ok 상태 업데이트
     if q == "해당없음":
         st.markdown(
             '<p style="color:red;font-weight:bold;">※ 위 자격이 없는 설치업자는 급배기방식을 전환하여 설치할 수 없습니다.</p>',
             unsafe_allow_html=True,
         )
-        st.stop()
+        ss.conversion_ok = False
+    else:
+        st.markdown(
+            '<p style="color:blue;font-weight:bold;">◎ 급배기전환 작업이 가능합니다.</p>',
+            unsafe_allow_html=True,
+        )
+        ss.conversion_ok = True # 자격 있으면 전환 가능으로 설정
 
-    if st.button("급배기전환 작업이 가능합니다.( 더블클릭 하세요!)"):
+    # '다음' 버튼 추가 (conversion_ok가 True일 때만 활성화)
+    if st.button("다음", disabled=not ss.conversion_ok):
         ss.page = "product"
-        ss.conversion_ok = True
-        ss.판별완료 = True
-        st.stop()
+        # ss.판별완료 = True # 다음 페이지 이동 시 판별 완료 상태로 설정 (선택 사항, 필요시 주석 해제)
+        st.rerun() # 페이지 전환을 위해 rerun 호출
 
 # ────────────────────────────────────────────────
 elif ss.page == "product":
