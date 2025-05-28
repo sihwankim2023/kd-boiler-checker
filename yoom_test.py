@@ -427,7 +427,7 @@ elif ss.page == "product":
         ss.show_status = False     # 전환결과 숨기기
         ss['판별완료'] = False     # 확인서 버튼 비활성화
         ss.conversion_ok = False   # conversion 상태 초기화
-        st.stop()
+        st.rerun()  # 페이지 새로고침 추가
 
 
 
@@ -535,8 +535,9 @@ elif ss.page == "form":
 
     # ─── 상단에 '이전' 버튼 추가 ───
     if st.button("◀ 이전으로 (더블클릭)", key="back_to_product"):
-        ss.page = "product"  # model에서 product로 변경
-        st.stop()
+        ss.page = "product"
+        ss.show_status = True  # 전환결과 표시 유지
+        st.rerun()  # 페이지 새로고침 추가
 
     # == 상단 : 제품 정보 ==
     st.markdown("### ■ 급배기전환 제품 정보")
