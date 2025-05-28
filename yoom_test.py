@@ -393,6 +393,7 @@ if st.session_state.page == "model":
             "가스보일러 판매업체 직원으로서 A/S 업무에 2년 이상 근무한 자",
            "해당없음",
         ],
+        key="qualification_radio",
         index=0 if not ss.selected_qualification else [
             "가스보일러 제조사의 A/S 종사자",
             "가스보일러 판매업체 직원으로서 가스보일러 제조사의 A/S 교육을 받은 자",
@@ -400,7 +401,7 @@ if st.session_state.page == "model":
             "해당없음"
         ].index(ss.selected_qualification)
     )
-    ss.selected_qualification = q
+    ss.selected_qualification = st.session_state.qualification_radio
 
     # 자격 선택에 따른 메시지 표시 및 conversion_ok 상태 업데이트
     if q == "해당없음":
