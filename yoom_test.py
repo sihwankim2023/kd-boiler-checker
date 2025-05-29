@@ -4,10 +4,16 @@ from datetime import date, datetime
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
-#from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 import re
 import base64
+
+# PDF 생성을 위한 추가 라이브러리
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import mm
 
 def get_base64_image(image_path):
     try:
@@ -154,6 +160,180 @@ def make_docx(info: dict, sign_png: BytesIO | None) -> BytesIO:
     doc.save(buf)
     buf.seek(0)
     return buf
+
+def make_pdf(info: dict) -> BytesIO:
+    from io import BytesIO
+    import os
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Table, TableStyle,
+        Spacer, KeepTogether
+    )
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
+    buffer = BytesIO()
+
+    # 한글 폰트 등록
+    font_paths = [
+        "C:/Windows/Fonts/malgun.ttf",
+        "C:/Windows/Fonts/gulim.ttc",
+        "C:/Windows/Fonts/batang.ttc",
+    ]
+    korean_font = None
+    for fp in font_paths:
+        if os.path.exists(fp):
+            try:
+                pdfmetrics.registerFont(TTFont('Korean', fp))
+                korean_font = 'Korean'
+                break
+            except:
+                pass
+    if not korean_font:
+        korean_font = 'Helvetica'
+
+    # 문서 설정
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20, leftMargin=20,
+        topMargin=20, bottomMargin=20
+    )
+
+    # 스타일 생성 함수
+    def make_style(name, size, align):
+        return ParagraphStyle(
+            name,
+            fontName=korean_font,
+            fontSize=size,
+            leading=size * 1.6,
+            alignment=align,
+        )
+
+    header_style   = make_style('Header',   9, TA_LEFT)
+    title_style    = make_style('Title',   16, TA_CENTER)
+    subtitle_style = make_style('Subt',    9, TA_CENTER)
+    normal_style   = make_style('Normal',  9, TA_LEFT)
+    right_style    = make_style('Right',   9, TA_RIGHT)
+
+    story = []
+
+    # 제목부
+    story.append(Paragraph("[별지 제44호 서식] <개정 23.07.11>", header_style))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph("<b>연소기 변경 확인서</b>", title_style))
+    story.append(Spacer(1, 4))
+    story.append(Paragraph("(제4-22조 및 제4-31조 관련)", subtitle_style))
+    story.append(Spacer(1, 12))
+
+    # 표 데이터
+    table_data = [
+        ['번호','연소기명','수량','변경내역','변경일자','연소기 변경 작업자','',''],
+        ['','','','','','소속','성명(서명)','작업자격'],
+        [
+            info['번호'],
+            info['연소기명'],
+            str(info['수량']),
+            '✔ 가스보일러\n급배기방식\n전환',
+            info['변경일'].strftime('%Y-%m-%d'),
+            info['작업자_소속'],
+            info['작업자_성명'],
+            # 여기에 선택된 '작업자격'만 넣기
+             info['작업자격'].replace(" ", "\n")  # 원하시면 공백을 줄바꿈으로 바꿀 수도 있습니다
+    ]
+]
+
+
+    # 컬럼 폭 정의 (숫자로만)
+    col_widths = [
+        15* mm,  # 번호
+        35* mm,  # 연소기명
+        8 * mm,  # 수량
+        30 * mm,  # 변경내역 (곱하기 연산자로 수정)
+        25 * mm,  # 변경일자
+        25 * mm,  # 소속
+        25 * mm,  # 성명(서명)
+        25 * mm,  # 작업자격
+    ]
+
+    table = Table(table_data, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('GRID',        (0,0), (-1,-1), 0.5, colors.black),
+        ('FONTNAME',    (0,0), (-1,-1), korean_font),
+        ('FONTSIZE',    (0,0), (-1,-1), 9),
+        ('ALIGN',       (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
+
+        # “변경내역” 셀만 가로·세로 중앙정렬
+        ('ALIGN',       (3,2), (3,2), 'CENTER'),
+        ('VALIGN',      (3,2), (3,2), 'MIDDLE'),
+
+        # 병합은 기존 그대로
+        ('SPAN',        (0,0),(0,1)),
+        ('SPAN',        (1,0),(1,1)),
+        ('SPAN',        (2,0),(2,1)),
+        ('SPAN',        (3,0),(3,1)),
+        ('SPAN',        (4,0),(4,1)),
+        ('SPAN',        (5,0),(7,0)),
+
+        # 패딩 축소
+        ('LEFTPADDING',  (0,0),(-1,-1), 2),
+        ('RIGHTPADDING', (0,0),(-1,-1), 2),
+        ('TOPPADDING',   (0,0),(-1,-1), 2),
+        ('BOTTOMPADDING',(0,0),(-1,-1), 2),
+    ]))
+    
+    # 확인 및 서명부
+    confirm = Paragraph("상기와 같이 연소기 변경 작업을 실시하였음을 확인합니다.", normal_style)
+    date_p  = Paragraph(info['변경일'].strftime('%Y년 %m월 %d일'), right_style)
+    comp_p  = Paragraph(f"○ 시공업체(상호): {info['시공업체']}", right_style)
+    mgr_p   = Paragraph(f"○ 시공관리자  : {info['시공관리자']}   (서명)", right_style)
+
+        # ————————————————————————————————————————
+    # 비고 표: HTML 태그로 줄바꿈·들여쓰기
+    note_text = """
+    <b>[비고]</b><br/>
+    1. 변경내역은 해당되는 사항에 표시<br/>
+    2. 기술능력은 연소기 변경 작업자의 자격 기재<br/>
+    &nbsp;&nbsp;가. 열량법령 작업자격 : 지침 별표18 (예시 : 연소기 제조사 A/S 종사자)<br/>
+    &nbsp;&nbsp;나. 가스보일러 급배기방식 전환 작업자격 : KGS GC2008 또는 GC209<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;(예시 : 가스보일러 제조사 A/S 교육 이수자)
+    """
+    note_para = Paragraph(note_text, normal_style)
+
+    note_table = Table([[note_para]], colWidths=[170*mm])
+    note_table.setStyle(TableStyle([
+        ('GRID',(0,0),(-1,-1),0.5,colors.black),
+        ('FONTNAME',(0,0),(-1,-1),korean_font),
+        ('FONTSIZE',(0,0),(-1,-1),9),
+        ('VALIGN',(0,0),(-1,-1),'TOP'),
+        ('LEFTPADDING',(0,0),(-1,-1),4), ('RIGHTPADDING',(0,0),(-1,-1),4),
+        ('TOPPADDING',(0,0),(-1,-1),4), ('BOTTOMPADDING',(0,0),(-1,-1),4),
+    ]))
+
+    # 한 페이지에 모두 묶기
+    story.append(KeepTogether([
+        table,
+        Spacer(1,8),
+        confirm,
+        Spacer(1,8),
+        date_p,
+        Spacer(1,4),
+        comp_p,
+        Spacer(1,4),
+        mgr_p,
+        Spacer(1,12),
+        note_table
+    ]))
+
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
 
 # ────────────────────────────────────────────────
 # 4) 데이터 (질문에서 주신 전체 리스트 그대로)
@@ -586,7 +766,7 @@ elif ss.page == "form":
     # 라벨 표시를 별도 줄에 배치
     g1.caption("번호"); g2.caption("연소기명"); g3.caption("수량"); g4.caption("변경일자")
 
-    st.checkbox("가스보일러 급배기방식 전환 (✔)", value=True, disabled=True)
+    st.checkbox("가스보일러 급배기방식 전환 ", value=True, disabled=True)
 
     # == 작업자 정보 ==
     st.markdown("### ■ 연소기 변경 작업자 정보")
@@ -640,8 +820,7 @@ elif ss.page == "form":
     }
     </style>
     """, unsafe_allow_html=True)
-
-    # ── 1차 버튼: DOCX 생성 & 2차 버튼 표시 ──
+    # ── 다운로드 버튼 ──
     if st.button("연소기 변경 확인서 다운로드"):
         try:
             # 필수 입력값 검증
@@ -666,25 +845,46 @@ elif ss.page == "form":
             # 히스토리에 추가
             st.session_state.history.append(current_data)
 
-            # 문서 생성
-            buf = make_docx(
-                dict(번호="NO.1", 연소기명=연소기명, 수량=수량, 변경일=변경일자,
-                     작업자_소속=작업자_소속, 작업자_성명=작업자_성명, 작업자격=작업자격,
-                     시공업체=시공업체, 시공관리자=시공관리자),
-                None
+            # 파일명 기본 부분
+            base_name = f"연소기_변경_확인서_{sanitize(시공관리자)}"
+            
+            # 문서 정보
+            doc_info = dict(
+                번호="NO.1", 
+                연소기명=연소기명, 
+                수량=수량, 
+                변경일=변경일자,
+                작업자_소속=작업자_소속, 
+                작업자_성명=작업자_성명, 
+                작업자격=작업자격,
+                시공업체=시공업체, 
+                시공관리자=시공관리자
             )
 
-            # 파일명 생성 (한글 지원)
-            file_name = f"연소기_변경_확인서_{sanitize(시공관리자)}.docx"
-            
-            # 다운로드 버튼 생성
-            st.download_button(
-                "저장하기",
-                data=buf.getvalue(),
-                file_name=file_name,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                key="download_button"
-            )
+            # 두 개의 버튼을 나란히 배치
+            col1, col2 = st.columns(2)
+
+            with col1:
+                # 워드 파일 다운로드
+                word_buf = make_docx(doc_info, None)
+                st.download_button(
+                    "📄 Word 파일 저장",
+                    data=word_buf.getvalue(),
+                    file_name=f"{base_name}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key="download_word"
+                )
+
+            with col2:
+                # PDF 파일 다운로드
+                pdf_buf = make_pdf(doc_info)
+                st.download_button(
+                    "📄 PDF 파일 저장",
+                    data=pdf_buf.getvalue(),
+                    file_name=f"{base_name}.pdf",
+                    mime="application/pdf",
+                    key="download_pdf"
+                )
 
         except Exception as e:
             st.error(f"문서 생성 중 오류가 발생했습니다: {str(e)}")
