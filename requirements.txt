@@ -3,3 +3,4 @@ pandas
 python-docx
 Pillow
 #streamlit-drawable-canvas==0.9.3 
+reportlab 
