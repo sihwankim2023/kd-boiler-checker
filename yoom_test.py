@@ -3,10 +3,13 @@ from io import BytesIO
 from datetime import date, datetime
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt
+from docx.shared import Pt, Cm, Inches
 from PIL import Image
 import re
 import base64
+import tempfile
+import os
+from docx2pdf import convert
 
 # PDF 생성을 위한 추가 라이브러리
 from reportlab.lib.pagesizes import A4
@@ -268,7 +271,7 @@ def make_pdf(info: dict) -> BytesIO:
         ('ALIGN',       (0,0), (-1,-1), 'CENTER'),
         ('VALIGN',      (0,0), (-1,-1), 'MIDDLE'),
 
-        # “변경내역” 셀만 가로·세로 중앙정렬
+        # "변경내역" 셀만 가로·세로 중앙정렬
         ('ALIGN',       (3,2), (3,2), 'CENTER'),
         ('VALIGN',      (3,2), (3,2), 'MIDDLE'),
 
