@@ -184,30 +184,38 @@ def make_pdf(info: dict) -> BytesIO:
     buffer = BytesIO()
 
     # 한글 폰트 등록
-    # font_paths = [
-    #     "C:/Windows/Fonts/malgun.ttf",
-    #     "C:/Windows/Fonts/gulim.ttc",
-    #     "C:/Windows/Fonts/batang.ttc",
-    # ]
-    # korean_font = None
-    # for fp in font_paths:
-    #     if os.path.exists(fp):
-    #         try:
-    #             pdfmetrics.registerFont(TTFont('Korean', fp))
-    #             korean_font = 'Korean'
-    #             break
-    #         except:
-    #             pass
-    # if not korean_font:
-    #     korean_font = 'Helvetica'
-
     # Streamlit Cloud 환경을 위해 시스템 폰트 사용 시도
-    korean_font_name = 'UnDotum'
-    try:
-        pdfmetrics.registerFont(TTFont(korean_font_name, korean_font_name))
-        korean_font = korean_font_name
-    except:
-        korean_font = 'Helvetica'
+    korean_font = 'Helvetica' # 기본값
+    
+    # 가능한 한글 폰트 파일 이름 목록
+    korean_font_files = ['NanumGothic.ttf', 'NanumGothicBold.ttf', 'UnDotum.ttf', 'gulim.ttc', 'batang.ttc', 'malgun.ttf']
+    
+    # 시스템 폰트 디렉토리 탐색
+    font_dirs = ['/usr/share/fonts/truetype/nanum', # 우분투 나눔 폰트 경로
+                 '/usr/share/fonts/truetype/unfonts-core', # 우분투 unfonts-core 경로
+                 '/usr/share/fonts/truetype', # 일반적인 리눅스 트루타입 폰트 경로
+                 'C:/Windows/Fonts' # 윈도우 폰트 경로
+                ]
+
+    found_font_path = None
+    for font_dir in font_dirs:
+        if os.path.exists(font_dir):
+            for font_file in korean_font_files:
+                font_path = os.path.join(font_dir, font_file)
+                if os.path.exists(font_path):
+                    try:
+                        pdfmetrics.registerFont(TTFont('KoreanFont', font_path))
+                        korean_font = 'KoreanFont'
+                        found_font_path = font_path
+                        break # 폰트를 찾으면 루프 종료
+                    except Exception as e:
+                        print(f"Error registering font {font_path}: {e}")
+            if found_font_path: # 폰트를 찾았으면 외부 루프 종료
+                break
+
+    if korean_font == 'Helvetica':
+        print("Warning: Korean font not found. Using Helvetica instead.")
+
 
     # 문서 설정
     doc = SimpleDocTemplate(
