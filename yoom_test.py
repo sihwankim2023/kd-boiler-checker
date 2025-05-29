@@ -9,14 +9,16 @@ import re
 import base64
 import tempfile
 import os
-from docx2pdf import convert
+# from docx2pdf import convert # ModuleNotFoundError 해결을 위해 제거
 
-# PDF 생성을 위한 추가 라이브러리
+# PDF 생성을 위한 추가 라이브러리 (reportlab 관련)
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics # make_pdf 함수 내부에 이미 import되어 있지만, 상단에 두어도 무방합니다.
+from reportlab.pdfbase.ttfonts import TTFont # make_pdf 함수 내부에 이미 import되어 있지만, 상단에 두어도 무방합니다.
 
 def get_base64_image(image_path):
     try:
@@ -879,16 +881,21 @@ elif ss.page == "form":
                 )
 
             with col2:
-                # PDF 파일 다운로드
-                pdf_buf = make_pdf(doc_info)
-                st.download_button(
-                    "📄 PDF 파일 저장",
-                    data=pdf_buf.getvalue(),
-                    file_name=f"{base_name}.pdf",
-                    mime="application/pdf",
-                    key="download_pdf"
-                )
+                # PDF 파일 다운로드 (make_pdf 함수 사용)
+                try:
+                    pdf_buf = make_pdf(doc_info)
+                    st.download_button(
+                        "📄 PDF 파일 저장",
+                        data=pdf_buf.getvalue(),
+                        file_name=f"{base_name}.pdf",
+                        mime="application/pdf",
+                        key="download_pdf"
+                    )
+                except Exception as e:
+                    st.error(f"PDF 생성 중 오류가 발생했습니다: {str(e)}")
+                    st.error("ReportLab 관련 오류일 수 있습니다. 필요한 라이브러리가 설치되었는지 확인해주세요.")
 
         except Exception as e:
+            # 전체 문서 생성 오류 처리
             st.error(f"문서 생성 중 오류가 발생했습니다: {str(e)}")
-            st.error("잠시 후 다시 시도해주세요.")
+            st.error("필수 입력 항목을 다시 확인하거나 잠시 후 다시 시도해주세요.")
