@@ -184,21 +184,29 @@ def make_pdf(info: dict) -> BytesIO:
     buffer = BytesIO()
 
     # 한글 폰트 등록
-    font_paths = [
-        "C:/Windows/Fonts/malgun.ttf",
-        "C:/Windows/Fonts/gulim.ttc",
-        "C:/Windows/Fonts/batang.ttc",
-    ]
-    korean_font = None
-    for fp in font_paths:
-        if os.path.exists(fp):
-            try:
-                pdfmetrics.registerFont(TTFont('Korean', fp))
-                korean_font = 'Korean'
-                break
-            except:
-                pass
-    if not korean_font:
+    # font_paths = [
+    #     "C:/Windows/Fonts/malgun.ttf",
+    #     "C:/Windows/Fonts/gulim.ttc",
+    #     "C:/Windows/Fonts/batang.ttc",
+    # ]
+    # korean_font = None
+    # for fp in font_paths:
+    #     if os.path.exists(fp):
+    #         try:
+    #             pdfmetrics.registerFont(TTFont('Korean', fp))
+    #             korean_font = 'Korean'
+    #             break
+    #         except:
+    #             pass
+    # if not korean_font:
+    #     korean_font = 'Helvetica'
+
+    # Streamlit Cloud 환경을 위해 시스템 폰트 사용 시도
+    korean_font_name = 'UnDotum'
+    try:
+        pdfmetrics.registerFont(TTFont(korean_font_name, korean_font_name))
+        korean_font = korean_font_name
+    except:
         korean_font = 'Helvetica'
 
     # 문서 설정
